@@ -64,7 +64,7 @@ scrapHtml = ($) => {
     result['fundamentos'] = extractRowsData($, rows, 8, 19);
     result['balanco_patrimonial'] = extractRowsData($, rows, 20, 23);
 
-    result['demonstrativos_resultados'] = {last_year: {}, last_quarter: {}};
+    result['demonstrativos_resultados'] = {ultimo_ano: {}, ultimo_trimestre: {}};
     result['demonstrativos_resultados']['ultimo_ano'] = extractRowsData($, rows, 25, 28, true);
     result['demonstrativos_resultados']['ultimo_trimestre'] = extractRowsData($, rows, 25, 28);
 
