@@ -1,5 +1,5 @@
 const functions = require('firebase-functions');
-const cors = require('cors')({origin: true});
+const cors = require('cors')({ origin: true });
 
 const cheerio = require('cheerio');
 const fetch = require('node-fetch');
@@ -8,7 +8,7 @@ const _ = require('lodash');
 getRows = ($) => {
     let rows = $('tr');
     rows = Object.keys(rows).map((key) => {
-        if(rows[key].name === 'tr')
+        if (rows[key].name === 'tr')
             return rows[key];
     }).filter((el) => el !== undefined);
     return rows;
@@ -27,10 +27,10 @@ extractRowsData = ($, rows, start, end, mixed = false) => {
         for (let i = init; i < stop; i += 1) {
             if (i % 2 == 0) {
                 let labelSpan = row.children[i].children[0];
-                let valSpan   = row.children[i + 1].children[0];
+                let valSpan = row.children[i + 1].children[0];
 
                 let label = _.deburr(_.snakeCase($(labelSpan).text()));
-                let val   = $(valSpan).text();
+                let val = $(valSpan).text();
 
                 if (!label || label === '')
                     continue;
@@ -54,19 +54,18 @@ scrapHtml = ($) => {
     let result = {};
     let rows = getRows($);
 
-    // no rows === no paper found
-    if (rows.length === 0) {
+    try {
+        result['empresa'] = extractRowsData($, rows, 0, 7);
+        result['oscilacao_cotacoes'] = extractRowsData($, rows, 8, 19, true);
+        result['fundamentos'] = extractRowsData($, rows, 8, 19);
+        result['balanco_patrimonial'] = extractRowsData($, rows, 20, 23);
+
+        result['demonstrativos_resultados'] = { ultimo_ano: {}, ultimo_trimestre: {} };
+        result['demonstrativos_resultados']['ultimo_ano'] = extractRowsData($, rows, 25, 28, true);
+        result['demonstrativos_resultados']['ultimo_trimestre'] = extractRowsData($, rows, 25, 28);
+    } catch (exception) {
         return null;
     }
-
-    result['empresa'] = extractRowsData($, rows, 0, 7);
-    result['oscilacao_cotacoes'] = extractRowsData($, rows, 8, 19, true);
-    result['fundamentos'] = extractRowsData($, rows, 8, 19);
-    result['balanco_patrimonial'] = extractRowsData($, rows, 20, 23);
-
-    result['demonstrativos_resultados'] = {ultimo_ano: {}, ultimo_trimestre: {}};
-    result['demonstrativos_resultados']['ultimo_ano'] = extractRowsData($, rows, 25, 28, true);
-    result['demonstrativos_resultados']['ultimo_trimestre'] = extractRowsData($, rows, 25, 28);
 
     return result;
 }
