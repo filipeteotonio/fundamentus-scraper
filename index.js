@@ -1,9 +1,12 @@
-const functions = require('firebase-functions');
 const cors = require('cors')({ origin: true });
 
 const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 const _ = require('lodash');
+
+const express = require('express');
+const app = express();
+
 
 getRows = ($) => {
     let rows = $('tr');
@@ -29,7 +32,7 @@ extractRowsData = ($, rows, start, end, mixed = false) => {
                 let labelSpan = row.children[i].children[0];
                 let valSpan = row.children[i + 1].children[0];
 
-                let label = _.deburr(_.snakeCase($(labelSpan).text()));
+                let label = _.deburr(_.camelCase($(labelSpan).text()));
                 let val = $(valSpan).text();
 
                 if (!label || label === '')
@@ -56,13 +59,13 @@ scrapHtml = ($) => {
 
     try {
         result['empresa'] = extractRowsData($, rows, 0, 7);
-        result['oscilacao_cotacoes'] = extractRowsData($, rows, 8, 19, true);
+        result['oscilacaoCotacoes'] = extractRowsData($, rows, 8, 19, true);
         result['fundamentos'] = extractRowsData($, rows, 8, 19);
-        result['balanco_patrimonial'] = extractRowsData($, rows, 20, 23);
+        result['balancoPatrimonial'] = extractRowsData($, rows, 20, 23);
 
-        result['demonstrativos_resultados'] = { ultimo_ano: {}, ultimo_trimestre: {} };
-        result['demonstrativos_resultados']['ultimo_ano'] = extractRowsData($, rows, 25, 28, true);
-        result['demonstrativos_resultados']['ultimo_trimestre'] = extractRowsData($, rows, 25, 28);
+        result['demonstrativosResultados'] = { ultimo_ano: {}, ultimo_trimestre: {} };
+        result['demonstrativosResultados']['ultimoAno'] = extractRowsData($, rows, 25, 28, true);
+        result['demonstrativosResultados']['ultimoTrimestre'] = extractRowsData($, rows, 25, 28);
     } catch (exception) {
         return null;
     }
@@ -77,7 +80,7 @@ scrap = async (url) => {
     return scrapHtml($);
 }
 
-exports.scraper = functions.https.onRequest((req, res) => {
+app.get('/', (req, res) => {
     cors(req, res, async () => {
         let url = 'http://www.fundamentus.com.br/detalhes.php?papel=' + req.query.paper;
         const data = await scrap(url);
@@ -87,4 +90,8 @@ exports.scraper = functions.https.onRequest((req, res) => {
             res.send(data);
         }
     })
+});
+
+app.listen(5000, function () {
+    console.log('Listening on port 5000!');
 });
