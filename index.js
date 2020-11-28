@@ -77,6 +77,10 @@ scrap = async (url) => {
     const res = await fetch(url);
     const html = await res.textConverted();
     const $ = cheerio.load(html);
+
+    console.log('res: ' + res);
+    console.log('html: ' + html);
+
     return scrapHtml($);
 }
 
