@@ -92,8 +92,8 @@ app.get('/', (req, res) => {
     })
 });
 
-var port = process.env.PORT || 5000;
+var port = process.env.PORT || 8080;
 
 app.listen(port, () => {
-    console.log('Listening on port ${port}!');
+    console.log('Listening on port: ' + port);
 });
