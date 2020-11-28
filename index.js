@@ -86,6 +86,7 @@ app.get('/', (req, res) => {
         const data = await scrap(url);
         if (data === null) {
             res.status(404).send('Not found');
+            console.log('Failed request of ' + req.query.paper + ' paper.');
         } else {
             res.send(data);
         }
